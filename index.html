@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynasty Fantasy Baseball — 2026 Preseason</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.5}
+.container{max-width:960px;margin:0 auto;padding:16px}
+header{text-align:center;padding:24px 0 8px;border-bottom:1px solid #334155}
+header h1{font-size:1.6rem;color:#f8fafc}
+header .sub{font-size:.8rem;color:#94a3b8;margin-top:4px}
+header .refresh{font-size:.7rem;color:#64748b;margin-top:2px}
+.tabs{display:flex;gap:0;border-bottom:2px solid #334155;margin-top:16px}
+.tab{padding:10px 20px;cursor:pointer;color:#94a3b8;font-size:.85rem;font-weight:600;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.2s}
+.tab:hover{color:#e2e8f0}
+.tab.active{color:#38bdf8;border-bottom-color:#38bdf8}
+.panel{display:none;padding:16px 0}
+.panel.active{display:block}
+.card{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;margin-bottom:10px}
+.card-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.rank{font-weight:700;font-size:1.1rem}
+.rank.top3{color:#22c55e}.rank.mid{color:#f59e0b}.rank.low{color:#ef4444}
+.team-name{font-weight:700;font-size:1rem;color:#f8fafc}
+.stats-line{font-size:.75rem;color:#94a3b8}
+.metrics{display:flex;gap:16px;margin-top:8px}
+.metric{text-align:center}
+.metric .label{font-size:.65rem;color:#64748b;text-transform:uppercase}
+.metric .value{font-size:1rem;font-weight:700;color:#f8fafc}
+.top-players{font-size:.7rem;color:#94a3b8;margin-top:4px}
+.blurb{font-size:.75rem;color:#94a3b8;margin-top:6px;font-style:italic}
+.cats{font-size:.7rem;margin-top:4px}
+.cats .strong{color:#22c55e}.cats .weak{color:#ef4444}
+details{margin-top:6px}
+details summary{font-size:.72rem;color:#38bdf8;cursor:pointer}
+details .full{font-size:.75rem;color:#94a3b8;margin-top:4px;white-space:pre-wrap}
+table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:12px}
+th{background:#334155;color:#94a3b8;padding:6px 8px;text-align:left;font-weight:600;font-size:.7rem;text-transform:uppercase}
+td{padding:6px 8px;border-bottom:1px solid #1e293b}
+tr:nth-child(even){background:#1e293b}
+tr:hover{background:#334155}
+.section-title{font-size:1.1rem;font-weight:700;color:#f8fafc;margin:20px 0 10px;padding-top:12px;border-top:1px solid #334155}
+.grade{display:inline-block;padding:2px 8px;border-radius:4px;font-weight:700;font-size:.85rem}
+.grade-a{background:#22c55e;color:#000}.grade-b{background:#60a5fa;color:#000}
+.grade-c{background:#fbbf24;color:#000}.grade-d{background:#fb923c;color:#000}.grade-f{background:#ef4444;color:#000}
+.commentary-box{background:#1e3a5f;border:1px solid #2563eb;border-radius:6px;padding:10px;margin-top:6px;font-size:.75rem;color:#bfdbfe}
+.pick-card{display:flex;gap:12px;align-items:flex-start}
+.pick-info{flex:1}.pick-analysis{flex:1.5}
+select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;padding:6px 10px;border-radius:4px;font-size:.8rem;width:100%;max-width:300px}
+.filter-bar{margin-bottom:12px}
+@media(max-width:600px){.metrics{flex-wrap:wrap}.pick-card{flex-direction:column}.tab{padding:8px 12px;font-size:.75rem}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>Dynasty Fantasy Baseball</h1>
+<div class="sub">Preseason 2026 — 10,000 Monte Carlo Sims · Actual H2H Schedule · Playoff Bracket · Per-Player Variance</div>
+<div class="refresh">Last data refresh: March 16, 2026</div>
+</header>
+<div class="tabs">
+<div class="tab active" data-tab="rankings">Power Rankings</div>
+<div class="tab" data-tab="reports">Team Reports</div>
+<div class="tab" data-tab="dynasty">Dynasty Value</div>
+<div class="tab" data-tab="draft">Draft Analyzer</div>
+<div class="tab" data-tab="methodology">Methodology</div>
+</div>
+<div id="rankings" class="panel active"></div>
+<div id="reports" class="panel"></div>
+<div id="dynasty" class="panel"></div>
+<div id="draft" class="panel"></div>
+<div id="methodology" class="panel"></div>
+</div>
+<script>
+const DATA = {
+rankings: [
+{rank:1,name:"3rduda",power:81.4,strength:82.8,strong:"W, K, QS",weak:"SB, ERA, NS"},
+{rank:2,name:"arkinsjt",power:77.2,strength:84.3,strong:"NS, W, K",weak:"OBP, QS, SB"},
+{rank:3,name:"Maxjabb",power:77.1,strength:84.3,strong:"RBI, HR, R",weak:"SB, QS, NS"},
+{rank:4,name:"Kyledeleon",power:76.2,strength:82.3,strong:"HR, RBI, K",weak:"ERA, SB, NS"},
+{rank:5,name:"Amustafa79",power:64.9,strength:79.9,strong:"W, K, R",weak:"WHIP, SB, NS"},
+{rank:6,name:"Metdown",power:62.8,strength:85.6,strong:"R, RBI, HR",weak:"ERA, QS, NS"},
+{rank:7,name:"MannyRamirez24",power:54.2,strength:78.3,strong:"NS, RBI, HR",weak:"WHIP, QS, SB"},
+{rank:8,name:"Akwelch3492",power:53.2,strength:86.3,strong:"K, W, R",weak:"ERA, QS, OBP"},
+{rank:9,name:"The Ape",power:48.0,strength:86.0,strong:"NS, W, K",weak:"SLG, SB, QS"},
+{rank:10,name:"Duda24",power:42.4,strength:84.8,strong:"K, W, RBI",weak:"OBP, NS, SB"}
+],
+sim: {
+"3rduda":{w:16.1,l:5.5,std:2.20,range:"13-11 to 19-5",med:2,po:92.7,ch:30.4},
+"Kyledeleon":{w:15.1,l:6.4,std:2.25,range:"12-12 to 18-6",med:3,po:84.6,ch:23.7},
+"arkinsjt":{w:15.0,l:6.5,std:2.18,range:"12-12 to 18-6",med:3,po:83.4,ch:21.7},
+"Maxjabb":{w:14.8,l:6.7,std:2.26,range:"12-12 to 18-6",med:3,po:80.5,ch:17.0},
+"Amustafa79":{w:12.3,l:9.1,std:2.30,range:"9-15 to 15-9",med:5,po:37.0,ch:5.3},
+"Metdown":{w:10.8,l:10.6,std:2.26,range:"8-16 to 14-10",med:6,po:15.3,ch:1.5},
+"MannyRamirez24":{w:9.6,l:11.6,std:2.18,range:"7-17 to 12-12",med:7,po:6.4,ch:0.4},
+"Akwelch3492":{w:5.9,l:15.8,std:1.93,range:"3-21 to 8-16",med:8,po:0.1,ch:0.0},
+"The Ape":{w:4.3,l:17.3,std:1.77,range:"2-22 to 7-17",med:9,po:0.0,ch:0.0},
+"Duda24":{w:3.7,l:18.4,std:1.69,range:"2-22 to 6-18",med:10,po:0.0,ch:0.0}
+},
+strengths: {
+"3rduda":[63.5,66.2],"Kyledeleon":[70.0,64.4],"Maxjabb":[71.8,62.5],"arkinsjt":[69.0,63.0],
+"Metdown":[67.4,60.1],"Amustafa79":[66.4,62.7],"Akwelch3492":[63.4,58.2],
+"MannyRamirez24":[64.0,61.0],"The Ape":[67.3,62.1],"Duda24":[64.1,58.9]
+},
+topPlayers: {
+"3rduda":[["Ozzie Albies","2B",77.1],["Aaron Judge","OF",76.3],["Trea Turner","UT",76.0]],
+"Akwelch3492":[["Gleyber Torres","2B",77.5],["Bobby Witt Jr.","UT",76.2],["Matt McLain","2B",76.2]],
+"Amustafa79":[["Gunnar Henderson","UT",76.2],["Riley Greene","OF",75.8],["Cody Bellinger","OF",75.7]],
+"Duda24":[["Nico Hoerner","2B",77.7],["Freddie Freeman","1B",76.0],["James Wood","OF",75.9]],
+"Kyledeleon":[["Shohei Ohtani","UT",76.3],["Pete Alonso","1B",76.1],["Adley Rutschman","C",76.0]],
+"MannyRamirez24":[["William Contreras","C",77.9],["Kyle Schwarber","UT",76.2],["Vladimir Guerrero Jr.","1B",76.2]],
+"Maxjabb":[["Corbin Carroll","OF",76.2],["Kyle Tucker","OF",76.2],["Zach Neto","UT",76.1]],
+"Metdown":[["Cal Raleigh","C",78.4],["Ketel Marte","2B",78.2],["Brice Turang","2B",77.9]],
+"The Ape":[["Jazz Chisholm Jr.","2B",77.3],["Salvador Perez","C",76.8],["Elly De La Cruz","UT",76.2]],
+"arkinsjt":[["Fernando Tatis Jr.","OF",76.2],["CJ Abrams","UT",75.9],["Matt Olson","1B",75.9]]
+},
+blurbs: {
+"3rduda|current_year":"3rduda sits at #7 overall with a 82.8 season score, but the 92.7% playoff odds and 30.4% championship probability suggest this team is quietly dangerous despite the middling ranking. The lineup (86.3) and bench depth (85.7) are legitimate strengths, and a pitching staff that leads in W, K, and QS can dominate half the pitching categories on any given week. The path to a title runs through fixing a glaring pitching balance issue (63.5/100) — specifically ERA and NS — as those two categories could cost them in a deep playoff run against elite staffs.",
+"Akwelch3492|current_year":"Akwelch3492 presents a fascinating paradox: a season strength score of 86.3 — best in the league — backed by elite balance across hitting (88.8) and pitching (87.4), yet playoff odds sit at a staggering 0.1%. The roster dominates in K, W, and R but is being buried by ERA, QS, and OBP, suggesting a pitching staff that piles up strikeouts while hemorrhaging runs and failing to go deep into games — a brutal combination in a categories format. With a projected median finish of 8th despite owning the top overall score, this team is a cautionary tale about categorical distribution: raw talent means nothing if ERA and WHIP are consistently gifting points to opponents.",
+"Amustafa79|current_year":"Amustafa79 ranks 9th overall with a 79.9 season strength score, though their median finish projection of 5.0 suggests more competitive upside than their current standing implies. The pitching staff drives value through wins and strikeouts, but a pitch balance score of just 62.9 and glaring weaknesses in WHIP and NS will consistently cost points in close matchups. With only 37% playoff odds and a thin 5.3% championship probability, this roster needs either a WHIP-stabilizing arm or stolen base contributor to realistically contend.",
+"Duda24|current_year":"Duda24 presents a fascinating paradox: a legitimately strong roster scoring 84.8 overall with elite pitching balance (87.0) and solid hitting depth (83.5 bench), yet the projection model gives them zero playoff odds with a median finish of 10th. The strength in K, W, and RBI is real, but chronic weaknesses in OBP, SB, and NS appear to be creating a category distribution problem severe enough to consistently cost them matchups despite the overall talent. Until they address the stolen base and saves pipeline, this team is essentially a well-constructed ship sailing in the wrong direction.",
+"Kyledeleon|current_year":"Kyledeleon ranks 8th in season strength at 82.3, but the underlying numbers tell a more optimistic story — an 84.6% playoff probability and 23.7% championship odds suggest this roster punches above its current standing. The team's power-heavy profile (HR, RBI, K) provides a reliable floor in half the scoring categories, while elite bench depth at 94.4/100 offers meaningful roster flexibility to address weaknesses. The path to a title runs through fixing a leaky pitching staff, as poor ERA, WHIP, and NS marks (pitch balance of 67.2/100) will consistently surrender points in three categories that could be the difference in tight playoff matchups.",
+"MannyRamirez24|current_year":"MannyRamirez24 sits dead last in season strength at 78.3, and the numbers back it up — a 6.4% playoff odds and just 9.6 projected wins paint a bleak picture despite solid power production in HR, RBI, and NS. The pitching staff is the primary culprit, with a 57.6 pitch balance score and glaring weaknesses in WHIP and QS that will consistently surrender category points on that side of the ledger. The one silver lining is an impressive 92.9 bench depth score, suggesting there's enough prospect or reserve talent to potentially reshape this roster, but meaningful competitiveness likely remains a season or two away.",
+"Maxjabb|current_year":"Maxjabb ranks 6th overall with an 84.3 score, but their 80.5% playoff odds and median finish of 3.0 suggest they're built to peak when it matters most. The lineup is a legitimate power threat anchored by elite RBI, HR, and R production, though the near-zero contribution in SB and a shaky pitching balance (70.6) — particularly in QS and NS — could cost them in close weekly matchups. With a 98.2 bench depth score, they have the roster flexibility to address weaknesses at the deadline, making them a dangerous 14.8-win team that could absolutely make noise in a playoff run despite the mid-pack regular season projection.",
+"Metdown|current_year":"Meltdown ranks third overall with an 85.6 score built on elite offensive production, projecting as one of the league's most dangerous lineups in R, RBI, and HR. The 89.0 bench depth score suggests strong roster flexibility, but the pitching staff is a serious liability — ERA, QS, and NS all rank among the weakest categories, dragging down what should be a contending squad. Despite the offensive firepower, those pitching deficiencies explain the troubling 15.3% playoff odds and 6.0 median finish, meaning significant pitching upgrades are needed to translate raw talent into postseason results.",
+"The Ape|current_year":"The Ape present a fascinating paradox — a season strength score of 86.0 and elite bench depth (92.0) suggest a roster built to compete, yet a median finish of 9th and 0.0% playoff odds expose a brutal scheduling reality or critical categorical vulnerability. The pitching staff leads in NS, W, and K but the 75.0 pitch balance score and weakness in QS signal a bullpen-heavy construction that likely bleeds ERA and WHIP in volatile stretches. Until the SLG and SB deficiencies are addressed and the rotation stabilized, this team risks being a dynasty asset hoarder that perpetually underperforms its talent ceiling in the standings.",
+"arkinsjt|current_year":"arkinsjt slots in at #5 overall with a well-rounded 84.3 score, backed by elite bench depth (90.1) that provides strong roster flexibility throughout a long dynasty season. The pitching staff is a legitimate weapon, leading in NS, W, and K, though the rotation's QS struggles and a thin SB profile (weakest positional category) create exploitable holes in H2H matchups. An 83.4% playoff probability and 21.7% championship odds reflect a team with genuine contention upside, but improving OBP and SB production will be critical to making a deep postseason run."
+},
+reports: {
+"3rduda":"# 3rduda — 2025 Dynasty H2H Preseason Report\n\n---\n\n## Executive Summary\n3rduda enters the season as the clear top-ranked team in the league, posting an 82.83 season strength score with elite pitching depth and a balanced, high-floor hitting core. The roster is built to win now, with 93% playoff odds and a realistic shot at the title — though ERA and saves exposure create a ceiling concern in close matchups. This is a championship-or-bust roster.\n\n---\n\n## Projected Finish Range\n**Median: 2nd | Range: 1st–4th**\n\n---\n\n## Top 3 Strengths\n1. **Pitching Volume (W, K, QS):** Crochet, Fried, deGrom, Ryan, Singer, and Rasmussen form one of the deepest SP corps in the league. Hitting the 30 IP minimum is a non-issue at 100 IP pace.\n2. **Lineup Depth:** Nine active hitters all score 74.5+, providing consistent R, RBI, HR, and OBP production with virtually no dead weight.\n3. **Bench Quality:** An 85.69 bench score means Singer alone is a legitimate starter on most rosters — injuries won't derail this team.\n\n---\n\n## Top 3 Weaknesses\n1. **Saves/Holds (NS):** No elite closer is visible on this roster. Losing NS weekly is a structural problem that compounds over a long season.\n2. **ERA Vulnerability:** deGrom's injury history and Rasmussen's workload concerns make ERA fragile. One bad stretch could flip this from a strength to a liability.\n3. **Stolen Bases:** Despite Turner, Arozarena, Garcia, and Harris II, SB ranks as a weakness — suggesting the category is highly contested leaguewide and this team still trails.\n\n---\n\n## Key Players to Watch\n- **Jacob deGrom:** Health is everything. A full deGrom is a difference-maker in K and W; an injured deGrom exposes ERA.\n- **Maikel Garcia:** At 26, upside is highest here. A breakout lifts an already-strong SB category.\n- **Garrett Crochet:** The staff ace. Monitor workload management given his innings history.\n\n---\n\n## Recommended Strategy\n**Target relief pitching aggressively in trades and adds.** NS is the one category dragging down an otherwise dominant roster. Offer bench depth (Singer, Rasmussen) to acquire a proven closer. Protect ERA by streaming conservatively — don't chase wins at the cost of ratios. Let the lineup run; don't overthink it.",
+"Akwelch3492":"# Akwelch3492 — 2025 Dynasty Preseason Report\n\n---\n\n## Executive Summary\nAkwelch3492 enters the season as a bottom-tier contender, ranking 8th of 10 with a projected median finish of 8th and zero playoff odds. The roster carries legitimate pitching volume and a strong speed-and-runs hitting core, but chronic ERA and OBP liabilities undermine category competitiveness week to week. Without significant roster intervention, this team is trending toward a rebuilding posture rather than a competitive one.\n\n---\n\n## Projected Finish Range\n**7th–10th | Median: 8th | Playoff Odds: 0%**\n\n---\n\n## Top 3 Strengths\n1. **Strikeouts & Wins** — A five-deep SP rotation of Gilbert, Pepiot, Strider, Eovaldi, and Baz provides reliable K and W production. Strider's upside alone can swing weekly matchups.\n2. **Speed & Runs** — Witt Jr., McLain, Chourio, Langford, and Crews form an elite SB/R pipeline. This team can dominate both categories in most matchups.\n3. **Bench Depth (86.01)** — Three high-upside outfielders (McLain, Chourio, Crews) sitting on the bench signals strong dynasty asset depth even if the active lineup underperforms.\n\n---\n\n## Top 3 Weaknesses\n1. **ERA** — The rotation's weakest link. Eovaldi (age 36, injury history) and Baz (durability concerns) drag ERA projections down, making this a near-automatic loss in that category.\n2. **Quality Starts** — Despite rotation volume, the staff skews toward strikeout-over-depth profiles. QS will be inconsistently won, costing points in close matchups.\n3. **OBP** — Torres is the only hitter with a genuine OBP profile. The speed-heavy lineup sacrifices on-base percentage, creating a structural hole that's difficult to patch mid-season.\n\n---\n\n## Key Players to Watch\n- **Spencer Strider (SP)** — Health is everything. A full season unlocks a top-5 pitching asset; another IL stint accelerates the rebuild timeline.\n- **Jackson Chourio (OF, Bench)** — At 22, Chourio's development trajectory could make him the most valuable trade chip or breakout asset on the roster.\n\n---\n\n## Recommended Strategy\n**Sell high on veterans, buy young.** George Springer (36) and Trevor Story (33) have limited dynasty runway — move them for prospects or younger contributors. Prioritize acquiring an ERA-stabilizing SP (sub-3.80 FIP profile) to patch the rotation's biggest liability. Activate McLain or Chourio over Story immediately to maximize the speed core. This is a **retool, not a rebuild** — the young talent is here; the aging veterans are blocking it.",
+"Amustafa79":"# Amustafa79 — 2025 Dynasty H2H Preseason Report\n\n---\n\n## Executive Summary\nAmustafa79 is a well-rounded mid-tier contender built on pitching depth and run production, sitting fifth overall with a season score of 79.88. The roster is notably deep — bench depth (89.79) outpaces the active lineup (80.89) — suggesting lineup optimization is still on the table. However, chronic weaknesses in WHIP, SB, and NS create a ceiling that limits championship upside to just 5%.\n\n---\n\n## Projected Finish Range\n**Median: 5th | Range: 3rd–7th | Playoff Odds: 37%**\n\n---\n\n## Top 3 Strengths\n1. **Wins & Strikeouts** — Webb, Valdez, Bibee, and Gore form one of the deepest SP cores in the league, projecting as a consistent 2-category hammer every period.\n2. **Run Scoring** — Henderson, Greene, Bellinger, Chapman, and Arraez create a deep, high-OBP lineup that should dominate R and compete in RBI most weeks.\n3. **Bench Depth (89.79)** — Merrill and Rafaela are legitimate starters on most rosters. This depth provides strong trade leverage and injury insurance.\n\n---\n\n## Top 3 Weaknesses\n1. **WHIP** — No true swing-and-miss/contact-suppression ace. Gore and Bibee carry risk; a rough stretch from any starter tanks this category fast.\n2. **Stolen Bases** — Henderson, Kwan, and Rafaela offer some speed, but Rafaela is on the bench. SB will be a near-automatic loss most matchups.\n3. **Saves/Holds (NS)** — Zero elite closers visible on the roster. At 30 IP minimum per period, punting NS is costly across a full season.\n\n---\n\n## Key Players to Watch\n- **Gunnar Henderson** — The dynasty cornerstone. His R/SB combo partially patches the speed gap; a down year derails multiple categories simultaneously.\n- **Riley Greene** — A breakout candidate at 25 whose RBI/HR upside could elevate the power profile significantly.\n- **Tanner Bibee** — The swing arm in the rotation. His WHIP management will largely determine whether pitching is a net positive or a liability.\n\n---\n\n## Recommended Strategy\n**Trade from bench depth to address NS.** Flip Merrill or Rafaela for a proven closer — even a committee arm improves a near-automatic category loss. Secondarily, activate Rafaela over Grisham to maximize SB. This team wins in 3–5 category blowouts; tightening the two-category NS/SB drain could push playoff odds meaningfully above 37%.",
+"Duda24":"# Duda24 — 2025 Dynasty H2H Preseason Report\n\n---\n\n## Executive Summary\nDuda24 enters the season as the projected cellar-dweller, ranking last in overall power with zero playoff odds and a median projected finish of 10th. The roster has legitimate pitching upside and some middle-of-the-order thump, but critical gaps in OBP, saves, and stolen bases make consistent weekly category wins nearly impossible against competitive rosters.\n\n---\n\n## Projected Finish Range\n**8th–10th | Median: 10th | Playoff Odds: 0%**\n\n---\n\n## Top 3 Strengths\n1. **Strikeouts & Wins** — Skenes, Castillo, and Suarez form a legitimate three-headed rotation capable of dominating K and W categories weekly. IP pace at 100 ensures the 30-IP minimum is met consistently.\n2. **RBI Production** — Freeman, Devers, and Bohm create a deep RBI core; three first basemen with run-producing profiles will keep this category competitive most weeks.\n3. **Bench Depth (83.46)** — Swanson and Yelich provide above-average bench value, offering flexibility to stream or plug injuries without a significant drop-off.\n\n---\n\n## Top 3 Weaknesses\n1. **Saves/Closers (NS)** — Helsley is the only credible closer on the roster. One injury or role change eliminates this category entirely for weeks at a time.\n2. **OBP** — No consistent on-base threats outside Freeman. Hoerner helps, but Bohm, Wells, and Carpenter all profile as OBP liabilities.\n3. **Stolen Bases** — Hoerner and Volpe provide a modest SB floor, but there is no true speed weapon. This category will be conceded most matchups.\n\n---\n\n## Key Players to Watch\n- **Paul Skenes (SP)** — The team's highest-upside asset. A full healthy season could anchor K, W, and ERA simultaneously.\n- **James Wood (OF)** — At 23, Wood's R/HR profile has the most dynasty growth potential on the roster; a breakout elevates the entire hitting side.\n- **Ryan Helsley (RP)** — The lone saves source. Any injury or blown role makes NS unwinnable for the season.\n\n---\n\n## Recommended Strategy\n**Sell high on Freeman and Bohm** for younger assets or closer depth — dynasty value is declining. **Aggressively target saves** via trade or waiver wire; NS is a near-automatic weekly loss otherwise. Lean into the pitching strength by streaming SP streamers on weeks with favorable matchups to pad K and QS totals.",
+"Kyledeleon":"# Kyledeleon — 2025 Dynasty H2H Preseason Report\n\n---\n\n## Executive Summary\nKyledeleon enters 2025 as a legitimate contender, ranking 4th overall with an 82.33 season strength score and an 85% playoff probability. The roster is built around elite power and run production, anchored by a star-studded lineup that can bully opponents in HR, RBI, and R on a nightly basis. Pitching volatility — particularly ERA, WHIP, and saves — is the primary obstacle standing between this team and a championship.\n\n---\n\n## Projected Finish\n**Median: 3rd | Range: 1st–5th | Championship Odds: 24%**\n\n---\n\n## Top 3 Strengths\n1. **HR/RBI Dominance** — Ohtani, Alonso, Torkelson, and Naylor form one of the deepest power cores in the league. Winning both categories most weeks is a realistic baseline expectation.\n2. **Strikeout Pitching** — Williams, Peralta, and Kikuchi all profile as K-heavy starters. With a 100 IP pace and three viable arms, the K category should be consistently competitive.\n3. **Bench Depth (94.42)** — Rutschman, Crow-Armstrong, and Tovar sitting on the bench is a luxury problem. This team can absorb injuries without significant drop-off, a critical dynasty advantage.\n\n---\n\n## Top 3 Weaknesses\n1. **ERA/WHIP Exposure** — The rotation lacks a true ace stabilizer. Kikuchi (age 34) and Williams (injury history) carry real ERA/WHIP blowup risk, making these categories volatile week-to-week.\n2. **Saves/NS** — No reliable closer is visible on this roster. In a 10-team league, consistently losing NS is a structural deficit that compounds over a full season.\n3. **Stolen Bases** — Despite Crow-Armstrong and Cruz offering upside, SB remains a projected weakness. Cruz's contact issues and Crow-Armstrong's bench status limit the ceiling here.\n\n---\n\n## Key Players to Watch\n- **Gavin Williams (SP)** — His health and development are the single biggest swing factor for the pitching staff's ERA/WHIP floor.\n- **Pete Crow-Armstrong (OF, Bench)** — If he earns active lineup status, he immediately addresses the SB weakness while adding RBI value.\n- **Oneil Cruz (OF)** — A boom-or-bust asset; a healthy Cruz could quietly solve both SB and HR in one roster spot.\n\n---\n\n## Recommended Strategy\n**Target relief pitching aggressively** in trades or waiver adds — even a mid-tier closer would meaningfully shore up NS and stabilize ERA/WHIP. Consider packaging bench depth (Tovar, Rutschman) to acquire a frontline SP or proven closer, as the active lineup can absorb the loss. Lean into HR/RBI matchups early to build H2H momentum while the pitching staff finds its footing.",
+"MannyRamirez24":"# MannyRamirez24 — 2025 Preseason Team Report\n\n---\n\n## Executive Summary\nMannyRamirez24 is a middle-of-the-pack dynasty squad with genuine power upside but critical structural flaws on the mound. The roster's elite bench depth (92.93) masks a starting lineup that underperforms its talent level, and a 6% playoff odds projection tells the real story: this team needs significant recalibration to compete in 2025.\n\n---\n\n## Projected Finish Range\n**Median: 7th | Range: 5th–8th**\n\n---\n\n## Top 3 Strengths\n1. **HR/RBI Firepower** — Guerrero Jr., Schwarber, and Rooker form a legitimate middle-of-the-order core that should consistently win both power categories.\n2. **Save Coverage (NS)** — Ranked as the team's top categorical strength; a rare reliable commodity in H2H formats.\n3. **Bench Depth (92.93)** — The deepest asset on the roster. Gausman, Ragans, King, and Flaherty sitting on the bench represents real trade capital or injury insurance.\n\n---\n\n## Top 3 Weaknesses\n1. **WHIP** — With aging starters like Gray (36), Bassitt (37), and Gausman (35) leading the rotation, walk and hit suppression will be a persistent problem.\n2. **Quality Starts** — Only Littell profiles as a true QS specialist, and he's on the bench. The rotation lacks the durability and consistency to win this category regularly.\n3. **Stolen Bases** — Perdomo and Butler provide some speed, but Butler is benched and the lineup is overwhelmingly built around power, leaving SB as a near-automatic loss.\n\n---\n\n## Key Players to Watch\n- **Vladimir Guerrero Jr.** — A bounce-back or breakout season determines whether this team is a 5-seed or a 8-seed. He's the offensive engine.\n- **Cole Ragans** — The most valuable trade chip on the roster. His youth (28) and strikeout profile make him coveted; deal him for speed or WHIP help.\n- **Lawrence Butler** — Activate him. A 25-year-old with SB+R upside sitting on the bench while the team bleeds stolen bases is a lineup construction error.\n\n---\n\n## Recommended Strategy\n**Sell high on pitching depth, buy speed and WHIP.** The five-arm bench surplus is a luxury this team can't afford given its categorical holes. Target a true SB threat and a ground-ball pitcher who improves WHIP. Activate Butler immediately. Without aggressive trades, this roster is trending toward the bottom half of the standings all season.",
+"Maxjabb":"# Maxjabb — 2025 Dynasty H2H Preseason Report\n\n---\n\n## Executive Summary\nMaxjabb enters 2025 as a legitimate contender, ranking 3rd overall with an 84.26 season strength score and 80% playoff odds. The roster is built around an elite power-and-run hitting core, but chronic pitching deficiencies — particularly in saves and quality starts — create a structural ceiling that could cost close matchups. With exceptional bench depth (98.18), the team has the assets to address those gaps if management is proactive.\n\n---\n\n## Projected Finish Range\n**Median: 3rd | Range: 1st–5th | Championship Odds: 17%**\n\n---\n\n## Top 3 Strengths\n1. **Power Hitting (HR, RBI, R):** Tucker, Caminero, Suzuki, Busch, and Goodman form a deep power bloc that should dominate all three run-production categories consistently.\n2. **Bench Depth (98.18):** The deepest bench in the league provides flexibility to stream, absorb injuries, and execute in-season trades from a position of strength.\n3. **Speed Assets:** Carroll, Neto, and Duran give the team legitimate SB upside — notable given SB is listed as a weakness, suggesting deployment or injury risk rather than a talent gap.\n\n---\n\n## Top 3 Weaknesses\n1. **Saves/Holds (NS):** No elite closer is visible on the roster. In H2H categories, a single bad week in NS can swing a matchup.\n2. **Quality Starts (QS):** Woo, Brown, and Pivetta are solid but not top-tier rotation anchors. Robbie Ray on the bench adds depth but not certainty.\n3. **Pitching Ratio Vulnerability:** A thin closer corps forces heavy reliance on starters, increasing ERA/WHIP exposure if any starter slumps.\n\n---\n\n## Key Players to Watch\n- **Junior Caminero (Age 22):** A breakout season makes this team a championship-caliber roster. His HR/RBI upside at 22 is the highest-ceiling asset on the team.\n- **Bryan Woo (Age 26):** The ace-in-waiting. Health and workload management will determine whether the pitching staff is competitive or a liability.\n- **JJ Wetherholt (MiLB):** A future OBP/R contributor worth monitoring for a midseason call-up that could upgrade the middle infield.\n\n---\n\n## Recommended Strategy\n**Trade from bench depth to acquire a closer.** The 98.18 bench score is a luxury — convert it into NS and QS upgrades before the season starts. Target a reliever with saves upside and a back-end starter capable of eating quality innings. Avoid over-streaming pitchers that inflate ERA/WHIP. Let the offense carry early; stabilize the pitching staff by Week 4.",
+"Metdown":"# Metdown — 2025 Dynasty H2H Preseason Report\n\n---\n\n## Executive Summary\nMetdown is a middle-of-the-pack roster with genuine offensive firepower but a pitching staff that actively undermines its playoff viability. The disconnect between a strong bench depth score (89.01) and a mediocre active lineup score (78.49) suggests lineup construction and roster deployment are leaving wins on the table. Without significant pitching improvement, this team is likely to tread water near the bottom half of the standings.\n\n---\n\n## Projected Finish Range\n**Median: 6th | Range: 4th–7th | Playoff Odds: 15%**\n\n---\n\n## Top 3 Strengths\n1. **Power Offense (HR/R/RBI):** Raleigh, Machado, Marte, and Soto form a legitimate middle-of-the-order core that should consistently win the three power categories.\n2. **Lineup Depth:** Seven active hitters scoring 75+ redraft value provides resilience against injuries and slumps — this offense won't collapse.\n3. **Speed Upside:** Turang, Stott, and Lindor create a credible SB threat that most power-heavy rosters can't replicate, adding a fourth winnable hitting category.\n\n---\n\n## Top 3 Weaknesses\n1. **Pitching Ratios (ERA/WHIP):** No true ace anchoring the staff means ERA and WHIP will be liabilities nearly every matchup period.\n2. **Saves/Holds (NS):** Zero high-leverage relievers visible on the roster. NS will be a near-automatic loss each week.\n3. **Rotation Depth (QS):** Kelly (age 37), Sale (age 36), and Leiter (unproven) are fragile or inconsistent QS contributors. George Kirby sitting on the bench is a glaring deployment error.\n\n---\n\n## Key Players to Watch\n- **George Kirby (SP):** Benched despite being the team's best pitcher. Activating him immediately is the single highest-leverage roster move available.\n- **Brice Turang (2B):** At 26, he's the team's best dynasty asset for SB — his development trajectory could elevate the floor.\n- **Jack Leiter (SP):** The youngest arm on staff at 25; a breakout would meaningfully address the QS and ERA holes.\n\n---\n\n## Recommended Strategy\n**Sell offense, buy pitching.** The hitting surplus — particularly the 2B logjam of Marte/Turang/Stott — creates trade chips to acquire a legitimate SP with ERA/WHIP upside. Prioritize a closer or high-leverage reliever to stop the NS bleeding. Activate Kirby immediately. At 15% playoff odds, aggressive moves are warranted; standing pat guarantees a sixth-place finish.",
+"The Ape":"# The Ape — 2025 Preseason Team Report\n\n## Executive Summary\nThe Ape enters the season as a bottom-tier contender with a projected median finish of 9th and zero playoff odds. The roster carries genuine upside in the rotation and a handful of high-ceiling hitters, but chronic weaknesses in power and stolen bases — combined with a misaligned active lineup — make a meaningful climb in the standings unlikely without aggressive roster moves.\n\n---\n\n## Projected Finish Range: **8th–10th**\n\n---\n\n## Top 3 Strengths\n1. **Pitching Depth (W, K, NS):** Gallen, Alcantara, and Yamamoto form a legitimate top-three rotation capable of winning pitching categories nightly. Jeff Hoffman adds saves/holds value in NS.\n2. **Bench Depth (Score: 92):** Strong reserve talent — Perez, Holliday, Alvarez — provides trade chips and injury insurance above the league average.\n3. **IP Pace (100):** Consistent innings volume ensures the 30 IP minimum is never at risk, keeping ERA and WHIP categories competitive.\n\n---\n\n## Top 3 Weaknesses\n1. **SLG:** Despite Harper and Caglianone, the lineup lacks consistent middle-of-the-order thump. Caglianone is unproven, and Trout's injury history suppresses his impact.\n2. **SB:** Chisholm and De La Cruz offer speed, but both carry strikeout and availability concerns. The rest of the roster is largely stationary.\n3. **QS:** Liberatore is the only rotation arm projected to anchor this category. Alcantara's health history and Yamamoto's workload management create real exposure here.\n\n---\n\n## Key Players to Watch\n- **Elly De La Cruz (UT, Age 24):** His development as a multi-category contributor is central to the team's ceiling. A breakout in OBP would elevate this roster significantly.\n- **Sandy Alcantara (SP, Age 30):** Returning from Tommy John surgery, Alcantara's health directly determines whether QS becomes a strength or a liability.\n- **Roman Anthony (OF, Age 21):** The youngest high-scorer on the roster; a full-time role in Boston could make him a league-winner by midseason.\n\n---\n\n## Recommended Strategy\n**Sell bench depth, buy SLG.** With a 92 bench score and 0% playoff odds, hoarding depth is counterproductive. Target power-hitting outfielders or corner infielders via trade using Perez, Holliday, or Alvarez as currency. Prioritize QS-heavy starters on the waiver wire to shore up the rotation's most glaring gap.",
+"arkinsjt":"# arkinsjt — 2025 Dynasty H2H Preseason Report\n\n---\n\n## Executive Summary\narkinsjt enters 2025 as a legitimate contender, ranking **#2 overall** with an 84.34 season strength score and an elite bench depth of 90.12. The roster is built around a dominant pitching staff and a power-heavy lineup, though chronic weaknesses in OBP, SB, and QS create exploitable gaps in head-to-head matchups. With 83% playoff odds and a median projected finish of 3rd, this team is a consistent winner that needs targeted upgrades to break through for a championship.\n\n---\n\n## Projected Finish Range\n**Median: 3rd | Range: 1st–5th | Championship Odds: 22%**\n\n---\n\n## Top 3 Strengths\n1. **Strikeouts & Wins (NS, W, K):** Skubal, Cease, Nola, and Imanaga form one of the deepest SP cores in the league. Dominating three pitching categories is a structural advantage in H2H formats.\n2. **Power Hitting (HR/RBI):** Olson, Riley, Langeliers, Kurtz, and Soderstrom create a relentless middle-of-the-order. This team will bludgeon opponents in HR and RBI most weeks.\n3. **Bench Depth (90.12):** Montgomery and Boyd provide genuine upside off the bench — rare in dynasty formats. Flexibility to stream, pivot, or absorb injuries is a significant competitive edge.\n\n---\n\n## Top 3 Weaknesses\n1. **OBP:** No true on-base specialists anchor the lineup. Jacob Wilson is the lone OBP-profiled hitter, and that's insufficient across a full season.\n2. **Stolen Bases:** Despite Tatis Jr. and Abrams offering SB upside, the rest of the roster is speed-dead. One injury to either player collapses this category entirely.\n3. **Quality Starts:** Boyd and Imanaga profile as QS contributors, but the staff skews toward strikeout/win upside over length. The 30 IP minimum adds pressure to manage this carefully.\n\n---\n\n## Key Players to Watch\n- **Nick Kurtz (1B, Age 23):** Breakout candidate with HR/SLG upside. His development directly determines whether this team can dominate power categories outright.\n- **CJ Abrams (UT, Age 25):** The SB category lives or dies with him. A healthy, productive Abrams is the difference between punting SB and competing in it.\n- **Colson Montgomery (UT, Age 24):** The most valuable bench asset. A strong start could force him into the active lineup and elevate the team's ceiling meaningfully.\n\n---\n\n## Recommended Strategy\n**Target OBP and SB upgrades at the trade deadline.** The pitching surplus creates real trade capital — consider packaging a SP depth piece (Boyd) to acquire a high-OBP middle infielder or a proven base-stealer. In the short term, **stream aggressively for QS** to shore up that category without sacrificing ERA/WHIP. Protect Tatis Jr. and Abrams at all costs — their health is the single biggest variable on this roster."
+},
+teamSim: {
+"3rduda":{med:2,p10:1,p90:4,po:92.7,ch:30.4},
+"Kyledeleon":{med:3,p10:1,p90:5,po:84.6,ch:23.7},
+"arkinsjt":{med:3,p10:1,p90:5,po:83.4,ch:21.7},
+"Maxjabb":{med:3,p10:1,p90:5,po:80.5,ch:17.0},
+"Amustafa79":{med:5,p10:3,p90:7,po:37.0,ch:5.3},
+"Metdown":{med:6,p10:4,p90:7,po:15.3,ch:1.5},
+"MannyRamirez24":{med:7,p10:5,p90:8,po:6.4,ch:0.4},
+"Akwelch3492":{med:8,p10:7,p90:10,po:0.1,ch:0.0},
+"The Ape":{med:9,p10:8,p90:10,po:0.0,ch:0.0},
+"Duda24":{med:10,p10:8,p90:10,po:0.0,ch:0.0}
+},
+teamStrength: {
+"Akwelch3492":{score:86.33,rank:1,hb:88.78,pb:87.36,ip:100,bench:86.01},
+"The Ape":{score:86.02,rank:2,hb:95.62,pb:75.04,ip:100,bench:92.00},
+"Metdown":{score:85.57,rank:3,hb:85.95,pb:82.39,ip:100,bench:89.01},
+"Duda24":{score:84.76,rank:4,hb:85.39,pb:87.00,ip:100,bench:83.46},
+"arkinsjt":{score:84.34,rank:5,hb:77.27,pb:76.89,ip:100,bench:90.12},
+"Maxjabb":{score:84.26,rank:6,hb:81.12,pb:70.57,ip:100,bench:98.18},
+"3rduda":{score:82.83,rank:7,hb:82.40,pb:63.53,ip:100,bench:85.69},
+"Kyledeleon":{score:82.33,rank:8,hb:73.02,pb:67.21,ip:100,bench:94.42},
+"Amustafa79":{score:79.88,rank:9,hb:76.25,pb:62.94,ip:100,bench:89.79},
+"MannyRamirez24":{score:78.29,rank:10,hb:72.45,pb:57.55,ip:100,bench:92.93}
+},
+dynasty: [
+{rank:1,name:"Metdown",score:94.4,totalVal:2281,elite:30,quality:4,milb:5,avgVal:63.3,playoffPct:10.0,sznRank:3},
+{rank:2,name:"MannyRamirez24",score:92.0,totalVal:2305,elite:30,quality:4,milb:4,avgVal:62.3,playoffPct:10.0,sznRank:10},
+{rank:3,name:"3rduda",score:89.4,totalVal:2260,elite:30,quality:2,milb:6,avgVal:64.6,playoffPct:90.0,sznRank:7},
+{rank:4,name:"Amustafa79",score:89.0,totalVal:2144,elite:28,quality:4,milb:4,avgVal:65.0,playoffPct:50.0,sznRank:9},
+{rank:5,name:"Kyledeleon",score:88.0,totalVal:2296,elite:30,quality:4,milb:2,avgVal:67.5,playoffPct:90.0,sznRank:8},
+{rank:6,name:"Akwelch3492",score:88.0,totalVal:2136,elite:28,quality:4,milb:4,avgVal:61.0,playoffPct:0.0,sznRank:1},
+{rank:7,name:"arkinsjt",score:83.8,totalVal:2245,elite:33,quality:0,milb:6,avgVal:66.0,playoffPct:80.0,sznRank:5},
+{rank:8,name:"Maxjabb",score:83.7,totalVal:2220,elite:33,quality:0,milb:6,avgVal:67.3,playoffPct:70.0,sznRank:6},
+{rank:9,name:"The Ape",score:75.2,totalVal:1864,elite:27,quality:1,milb:5,avgVal:64.3,playoffPct:0.0,sznRank:2},
+{rank:10,name:"Duda24",score:55.9,totalVal:1610,elite:23,quality:1,milb:0,avgVal:61.9,playoffPct:0.0,sznRank:4}
+],
+dynastyBlurbs: {
+"3rduda":"3rduda sits as a legitimate dynasty powerhouse with a score of 89.4 and an elite-heavy roster featuring 30 players valued above 70, signaling exceptional depth at the top end rather than reliance on a few stars carrying dead weight. The 64.6 average player value across 34 scored players is among the strongest in the league, and a 90% playoff probability confirms this roster translates to immediate wins, not just future promise. With all 6 MiLB slots filled, the prospect pipeline is maximized, though the key question going forward is whether that farm system can sustain the elite core as it ages and whether the 2 replacement-level roster spots represent minor inefficiencies or early signs of depth erosion.",
+"Akwelch3492":"Akwelch3492 presents a fascinating paradox — ranking #1 in season strength with elite-heavy roster construction (28 players scoring above 70) yet carrying 0% playoff odds, suggesting significant injury or roster availability issues masking what is otherwise a top-tier dynasty core. The 88.0 dynasty score and 2136 total roster value place this team solidly at #6 overall, but the gap between in-season dominance potential and actual playoff positioning warrants scrutiny into roster health and lineup deployment. With 4 of 6 MiLB slots utilized and a strong base of established contributors averaging 61.0 per player across 34 scored roster spots, the long-term outlook is genuinely strong, though maximizing prospect capital by filling those final two MiLB slots could further solidify a dynasty window that appears ready to compete now if roster obstacles are resolved.",
+"Amustafa79":"Amustafa79 sits comfortably at #4 overall with a strong dynasty foundation built on elite depth — 28 players scoring above 70 is exceptional and suggests this roster can sustain competitiveness through attrition and aging curves without significant drop-off. However, the glaring disconnect between dynasty rank (#4) and current season strength (#9 of 10) with just 50% playoff odds indicates the roster skews older or is underperforming relative to its paper value, which warrants attention to near-term production. With 4 of 6 MiLB slots used and a total roster value of 2144, there's modest prospect capital in place, but adding a fifth or sixth high-upside MiLB asset would help bridge the gap between long-term ceiling and short-term competitiveness.",
+"Duda24":"Duda24 presents a paradoxical roster profile — ranking #3 in season strength suggests legitimate win-now talent with 23 elite players, yet a 0% playoff odds figure and last-place dynasty ranking of 10th expose critical structural vulnerabilities that undermine long-term competitiveness. The complete absence of MiLB investment (0 of 6 slots used) is the most damning dynasty indicator, leaving the team with zero prospect capital to replenish aging or declining contributors. With a total roster value of 1610 and an average of 61.9, this roster is built entirely on present-day production with no developmental pipeline, making it a classic win-now team that risks a steep cliff if even a handful of those 23 elite players regress or age out simultaneously.",
+"Kyledeleon":"Kyledeleon sits comfortably at #5 overall with a strong foundation built on elite talent, boasting 30 players scoring above 70 and a total roster value of 2,296, though the team's season strength ranking of just #8 suggests some of that value may be tied up in aging or inconsistent contributors. The 90% playoff odds indicate near-certain postseason relevance this year, but with only 2 of 6 MiLB slots utilized, the team is leaving significant prospect capital on the table that could either signal a win-now approach or an underdeveloped pipeline. To solidify a top-3 dynasty ranking long-term, prioritizing prospect acquisition to fill those four open MiLB slots should be the immediate focus, as the current average player value of 67.5 is solid but lacks the depth cushion needed to weather attrition over a multi-year window.",
+"MannyRamirez24":"MannyRamirez24 holds the #2 dynasty ranking with an elite roster construction, boasting 30 players scoring above 70 and a robust total value of 2305, but the glaring disconnect between dynasty strength and a last-place season rank with just 10% playoff odds suggests either significant injury attrition or a heavily future-weighted age profile dragging current production. The 62.3 average player value across 36 scored players is strong on paper, yet the 4 quality players in the 60-70 range relative to the 30 elite assets implies a boom-or-bust roster with little middle-class depth to absorb volatility. With only 4 of 6 MiLB slots utilized, there is untapped prospect capital available, and the long-term ceiling here is clearly a championship-caliber roster, but the owner must address whatever is suppressing 2025 production before the window on those elite assets begins to close.",
+"Maxjabb":"Maxjabb sits near the bottom of the dynasty rankings at #8 with a total roster value of 2220, but the roster construction tells an interesting story — all 33 scored players grade out as elite (>70), with zero quality or replacement-level contributors dragging down the average, suggesting a concentrated but potentially thin roster. The 67.3 average player value and 70% playoff odds indicate competitive present-day viability, ranking 6th in season strength, though the lack of depth beyond the elite tier creates significant injury and trade vulnerability. With all 6 MiLB slots filled, the prospect pipeline is maximized, which will be critical for sustaining long-term relevance and climbing from the #8 dynasty position as the current core ages.",
+"Metdown":"Metdown sits atop the dynasty rankings with an elite 94.4 score and a dominant 30 players graded above 70, signaling a roster built for sustained multi-year dominance rather than just a single window. The 2281 total roster value and 63.3 average player value reflect exceptional roster depth, with virtually no dead weight given only one replacement-level player across 35 scored roster spots. The one area of concern is the disconnect between dynasty rank and current season performance — a #4 season strength rank with just 10% playoff odds suggests some of that elite value may be tied up in younger players or prospects, making 2025-2026 the likely peak window when that talent fully matures.",
+"The Ape":"The Ape presents a fascinating paradox: a #2 season strength ranking paired with a #9 dynasty rank and 0% playoff odds suggests significant roster construction inefficiencies, likely stemming from salary or contract constraints burying an otherwise talented active roster. With 27 elite players (score >70) and a strong 64.3 average value across 29 scored players, the current talent base is legitimately competitive, but the dynasty score of 75.2 indicates the long-term outlook is being dragged down by age, contract situations, or thin prospect capital with only 5 of 6 MiLB slots utilized. The front office needs to aggressively convert present-day win-now value into dynasty capital by trading aging contributors for younger assets and filling that final MiLB slot, or this roster risks a hard competitive window collapse that the current dynasty ranking is already beginning to signal.",
+"arkinsjt":"arkinsjt ranks 7th overall with a total roster value of 2245 and an average player value of 66.0, suggesting a roster built around a strong core of 33 elite contributors but with a notable absence of quality depth — zero players in the 60-70 range creates a cliff from elite to replacement level. The full utilization of all 6 MiLB slots indicates active prospect investment, which is critical for long-term sustainability, though the current lack of mid-tier depth makes the team vulnerable to injury or regression among its top players. With an 80% playoff probability this season, the window is open now, but building out that middle tier should be the front office priority to avoid a sharp decline if even a handful of elite pieces underperform."
+},
+draftGrades: [
+{mgr:"The Ape",grade:"B",score:66.8,dyn:53.5,szn:40.1,best:"Ethan Holliday (Rd4, B+)",worst:"Carlos Lagrange (Rd3, C+)",strategy:"balanced",snark:"DRAFT GRADE: B-  The Ape played it relatively safe with a balanced approach, nabbing both an MLB-ready arm and a high-ceiling prep bat, though the execution was a bit uneven."},
+{mgr:"Duda24",grade:"B-",score:65.2,dyn:104.4,szn:78.3,best:"Robby Snelling (Rd1, B+)",worst:"Elmer Rodriguez (Rd3, B-)",strategy:"pitching-heavy",snark:"DRAFT GRADE: B+  This manager executed a balanced draft strategy that addressed both immediate needs and long-term upside, with a particular eye toward high-floor prospects."},
+{mgr:"Amustafa79",grade:"C+",score:62.0,dyn:99.1,szn:74.3,best:"Kruz Schoolcraft (Rd4, B)",worst:"Ethan Conrad (Rd2, C-)",strategy:"SS-centric",snark:"DRAFT GRADE: B-  Amustafa79 showed a clear preference for high-ceiling talent with three 55 FV prospects, though reaching for Ethan Conrad in the second round stands out as a head-scratcher."},
+{mgr:"3rduda",grade:"C+",score:61.8,dyn:148.2,szn:111.2,best:"Luis Hernandez (Rd4, B+)",worst:"Eli Willits (Rd2, C)",strategy:"SS-centric",snark:"DRAFT GRADE: B-  This manager took a balanced approach with a slight lean toward high-ceiling position players, nabbing three shortstops while showing a willingness to reach for their targets."},
+{mgr:"Metdown",grade:"C+",score:60.4,dyn:96.6,szn:72.4,best:"Thomas White (Rd1, B+)",worst:"Kade Anderson (Rd2, C-)",strategy:"pitching-heavy",snark:"DRAFT GRADE: B-  Meltdown clearly identified their pitching weakness and went all-in on addressing it, selecting three arms with significant upside but also considerable volatility."},
+{mgr:"MannyRamirez24",grade:"C+",score:58.8,dyn:94.1,szn:70.6,best:"Justin Crawford (Rd1, B)",worst:"Kyson Witherspoon (Rd4, C-)",strategy:"pitching-heavy",snark:"DRAFT GRADE: C+  MannyRamirez24 seemed to follow a 'swing for the fences' strategy, which is understandable given their last-place season ranking, but the execution left something to be desired."},
+{mgr:"Maxjabb",grade:"C",score:55.1,dyn:88.2,szn:66.1,best:"Leodalis De Vries (Rd1, B+)",worst:"Ryan Waldschmidt (Rd4, C-)",strategy:"outfield-focused",snark:"DRAFT GRADE: C+  Maxjabb seemed to be chasing upside with a 'stars and scrubs' approach, landing a potential impact talent in De Vries before taking some ambitious swings in the later rounds."},
+{mgr:"Akwelch3492",grade:"C-",score:51.5,dyn:82.4,szn:61.8,best:"Santiago Suarez (Rd3, C+)",worst:"Ichiro Cano (Rd2, C-)",strategy:"SS-centric",snark:"DRAFT GRADE: C+  This draft feels like someone trying to parallel park while blindfolded - technically getting the job done, but not exactly inspiring confidence."},
+{mgr:"Kyledeleon",grade:"C-",score:50.1,dyn:80.2,szn:60.1,best:"Zyhir Hope (Rd2, C)",worst:"Carter Baumler (Rd4, C-)",strategy:"outfield-focused",snark:"Kyle's draft strategy appears to be 'swing for the fences and ask questions later,' targeting high-ceiling prospects while showing a concerning disregard for consensus rankings."},
+{mgr:"arkinsjt",grade:"D",score:49.9,dyn:79.8,szn:59.8,best:"Eduardo Quintero (Rd1, C+)",worst:"Roch Cholowsky (Rd3, C-)",strategy:"outfield-focused",snark:"DRAFT GRADE: C-  This draft feels like someone trying to parallel park while blindfolded - there's a general sense of where they want to go, but the execution is a bit off."}
+],
+draftBoard: [
+{pk:1,rd:1,mgr:"Amustafa79",player:"Dax Kilby",pos:"SS",mlb:"NYY",rank:18,fv:55,eta:2027,tier:"Tier 2",score:65.7,grade:"B",vop:-4.2,scout:"Elite arm with mid-90s fastball and wipeout slider. Yankees top prospect with ace ceiling.",comment:"Taking Kilby at 1.1 feels like reaching for the ceiling fan when there's a perfectly good light switch at eye level."},
+{pk:2,rd:1,mgr:"Akwelch3492",player:"Kevin McGonigle",pos:"SS",mlb:"DET",rank:65,fv:50,eta:2028,tier:"Tier 3",score:51.3,grade:"C",vop:-15,scout:"Sweet-swinging middle infielder with plus hit tool. Doesn't have big power upside but profiles as a high-OBP catalyst.",comment:"Taking McGonigle at #2 overall feels like ordering a perfectly good ham sandwich at a Michelin-starred restaurant."},
+{pk:3,rd:1,mgr:"Duda24",player:"Robby Snelling",pos:"P",mlb:"MIA",rank:12,fv:60,eta:2026,tier:"Tier 1",score:71.5,grade:"B+",vop:-2.2,scout:"Elite left-handed arm, arguably the best pitching prospect in baseball. Three plus pitches with advanced feel.",comment:"A bit aggressive at #3 overall for Snelling, but when you have a southpaw who can paint corners like Bob Ross creates happy little trees, it's hard to fault the ambition."},
+{pk:4,rd:1,mgr:"3rduda",player:"Jesus Made",pos:"UT",mlb:"MIL",rank:55,fv:50,eta:2028,tier:"Tier 3",score:53.5,grade:"C",vop:-12.8,scout:"Raw but toolsy switch-hitter with huge power upside. Swing-and-miss concerns, but the ceiling is massive.",comment:"This feels like quite a reach for Made at #4 overall."},
+{pk:5,rd:1,mgr:"MannyRamirez24",player:"Justin Crawford",pos:"OF",mlb:"PHI",rank:22,fv:55,eta:2026,tier:"Tier 2",score:67.4,grade:"B",vop:-4.2,scout:"Elite speed prospect who profiles as a leadoff hitter. Plus-plus speed with improving plate approach.",comment:"A bit of a reach at #5 overall given Crawford's consensus ranking, but the pick makes sense for a team starving for speed."},
+{pk:6,rd:1,mgr:"3rduda",player:"Aidan Miller",pos:"SS",mlb:"PHI",rank:15,fv:55,eta:2027,tier:"Tier 2",score:67.7,grade:"B",vop:-2.2,scout:"One of the best hitting prospects in baseball. Advanced bat-to-ball skills with growing power.",comment:"Miller represents a classic case of betting on the hit tool first."},
+{pk:7,rd:1,mgr:"Kyledeleon",player:"Carson Benge",pos:"OF",mlb:"NYM",rank:85,fv:45,eta:2028,tier:"Tier 4",score:49.2,grade:"C-",vop:-15,scout:"Toolsy college outfielder with solid all-around game. Not elite in any one area.",comment:"A bit of a reach here at #7 for Benge. It's like bringing a Swiss Army knife to a lightsaber fight."},
+{pk:8,rd:1,mgr:"Metdown",player:"Thomas White",pos:"SP",mlb:"MIA",rank:8,fv:60,eta:2027,tier:"Tier 1",score:72.0,grade:"B+",vop:0,scout:"Flame-throwing right-hander with one of the best arms in the minors. Triple-digit heater with devastating slider.",comment:"A textbook value pick at #8 for Metdown, landing one of the most electric arms in the minors."},
+{pk:9,rd:1,mgr:"Maxjabb",player:"Leodalis De Vries",pos:"SS",mlb:"ATH",rank:10,fv:60,eta:2028,tier:"Tier 1",score:70.2,grade:"B+",vop:-0.2,scout:"Switch-hitting shortstop with elite tools across the board. Five-tool potential with plus defense.",comment:"A rock-solid selection at #9 that aligns perfectly with De Vries' consensus ranking."},
+{pk:10,rd:1,mgr:"arkinsjt",player:"Eduardo Quintero",pos:"OF",mlb:"LAD",rank:42,fv:50,eta:2028,tier:"Tier 3",score:58.3,grade:"C+",vop:-8,scout:"Power-hitting outfielder from the Dodgers' loaded system. Plus raw power with aggressive swing.",comment:"A classic case of reaching for ceiling over safety at #10."},
+{pk:11,rd:2,mgr:"Amustafa79",player:"Ethan Conrad",pos:"OF",mlb:"CHC",rank:78,fv:45,eta:2028,tier:"Tier 4",score:49.2,grade:"C-",vop:-15,scout:"Projectable outfielder with a nice left-handed swing. Gap power now, could grow into 15-20 HR pop.",comment:"This feels like quite a reach for Conrad at #11 overall."},
+{pk:12,rd:2,mgr:"Akwelch3492",player:"Ichiro Cano",pos:"1B",mlb:"CIN",rank:95,fv:45,eta:2029,tier:"Tier 4",score:47.7,grade:"C-",vop:-15,scout:"Yes, that name. Young infielder with good bat-to-ball skills and a polished approach for his age.",comment:"A significant reach here at #12 for Ichiro Cano."},
+{pk:13,rd:2,mgr:"Duda24",player:"Colt Emerson",pos:"UT",mlb:"SEA",rank:20,fv:55,eta:2028,tier:"Tier 2",score:66.7,grade:"B",vop:-1.8,scout:"Mariners' top prospect and one of the best young shortstops. Plus hit tool with emerging power.",comment:"A rock-solid grab of Seattle's top prospect."},
+{pk:14,rd:2,mgr:"3rduda",player:"Eli Willits",pos:"SS",mlb:"WSH",rank:70,fv:50,eta:2028,tier:"Tier 3",score:52.3,grade:"C",vop:-14,scout:"Athletic shortstop with well-rounded tools. Above-average speed and solid defensive instincts.",comment:"A significant reach here at #14 for Willits."},
+{pk:15,rd:2,mgr:"MannyRamirez24",player:"Jaxon Wiggins",pos:"SP",mlb:"CHC",rank:35,fv:55,eta:2027,tier:"Tier 2",score:64.9,grade:"B-",vop:-5,scout:"Power right-hander with mid-to-upper 90s heat. Cubs invested heavily; frontline starter ceiling.",comment:"A bit of a reach at 15 for Wiggins."},
+{pk:16,rd:2,mgr:"3rduda",player:"Josue De Paula",pos:"OF",mlb:"LAD",rank:48,fv:50,eta:2028,tier:"Tier 3",score:58.3,grade:"C+",vop:-8,scout:"Speedy outfielder in the Dodgers system with plus raw tools. Still raw offensively.",comment:"De Paula is a classic high-ceiling Dodgers prospect grab that feels a bit rich at pick 16."},
+{pk:17,rd:2,mgr:"Kyledeleon",player:"Zyhir Hope",pos:"OF",mlb:"LAD",rank:58,fv:50,eta:2029,tier:"Tier 3",score:54.5,grade:"C",vop:-10.2,scout:"Another Dodgers outfield prospect with projection. Raw power and speed but lots of swing-and-miss.",comment:"A rather ambitious reach here by Kyledeleon."},
+{pk:18,rd:2,mgr:"Metdown",player:"Kade Anderson",pos:"SP",mlb:"SEA",rank:82,fv:45,eta:2028,tier:"Tier 4",score:49.2,grade:"C-",vop:-15,scout:"Pitchability righty with a good changeup. Not overpowering but knows how to get outs.",comment:"Taking Anderson at #18 represents a significant reach relative to consensus rankings."},
+{pk:19,rd:2,mgr:"Maxjabb",player:"Joshua Baez",pos:"OF",mlb:"STL",rank:90,fv:45,eta:2029,tier:"Tier 4",score:47.7,grade:"C-",vop:-15,scout:"Raw power athlete with significant swing-and-miss concerns. High risk, high reward.",comment:"Baez at 19 feels like reaching for dessert before finishing your vegetables."},
+{pk:20,rd:2,mgr:"arkinsjt",player:"Ryan Sloan",pos:"SP",mlb:"SEA",rank:88,fv:45,eta:2028,tier:"Tier 4",score:49.2,grade:"C-",vop:-15,scout:"Crafty left-hander with solid secondary stuff. Profiles as mid-rotation arm.",comment:"This feels like quite a reach for Sloan at #20 overall."},
+{pk:21,rd:3,mgr:"Amustafa79",player:"JoJo Parker",pos:"SS",mlb:"TOR",rank:30,fv:55,eta:2028,tier:"Tier 2",score:66.2,grade:"B",vop:-2.2,scout:"Blue Jays' top prospect. Athletic shortstop with plus speed and polished bat.",comment:"JoJo Parker represents solid if unspectacular value at pick 21."},
+{pk:22,rd:3,mgr:"Akwelch3492",player:"Santiago Suarez",pos:"SP",mlb:"TB",rank:62,fv:50,eta:2028,tier:"Tier 3",score:56.3,grade:"C+",vop:-10,scout:"Rays pitching prospect with a plus fastball and developing breaking ball.",comment:"A classic case of reaching for ceiling over floor here."},
+{pk:23,rd:3,mgr:"Duda24",player:"Elmer Rodriguez",pos:"P",mlb:"NYY",rank:45,fv:50,eta:2028,tier:"Tier 3",score:60.8,grade:"B-",vop:-5.5,scout:"Power arm in the Yankees system with upper-90s heat.",comment:"A classic Yankees power arm grab."},
+{pk:24,rd:3,mgr:"The Ape",player:"Carlos Lagrange",pos:"SP",mlb:"NYY",rank:52,fv:50,eta:2028,tier:"Tier 3",score:59.3,grade:"C+",vop:-7,scout:"Young power-hitting pitcher/outfielder convert who throws mid-90s.",comment:"This feels like quite a reach for Lagrange at 24."},
+{pk:25,rd:3,mgr:"MannyRamirez24",player:"Cam Caminiti",pos:"SP",mlb:"ATL",rank:72,fv:50,eta:2028,tier:"Tier 3",score:54.5,grade:"C",vop:-11.8,scout:"Braves pitching prospect with solid stuff across the board.",comment:"This feels like quite a reach for Caminiti at #25 overall."},
+{pk:26,rd:3,mgr:"3rduda",player:"Travis Sykora",pos:"SP",mlb:"WSH",rank:40,fv:55,eta:2028,tier:"Tier 2",score:64.9,grade:"B-",vop:-3.5,scout:"Power arm for the Nationals with electric stuff. Upper-90s fastball with wipeout slider.",comment:"A classic case of betting on pure stuff over proximity."},
+{pk:27,rd:3,mgr:"Kyledeleon",player:"Jefferson Rojas",pos:"SS",mlb:"CHC",rank:75,fv:45,eta:2029,tier:"Tier 4",score:50.7,grade:"C",vop:-12,scout:"Young shortstop with good defensive instincts and a developing bat.",comment:"This feels like quite a reach for Rojas at #27 overall."},
+{pk:28,rd:3,mgr:"Metdown",player:"Luis Pena",pos:"SS",mlb:"MIL",rank:60,fv:50,eta:2028,tier:"Tier 3",score:58.3,grade:"C+",vop:-8,scout:"Versatile infielder with switch-hitting ability. Solid defender.",comment:"A bit of a reach here at #28 for Pena."},
+{pk:29,rd:3,mgr:"Maxjabb",player:"Liam Doyle",pos:"SP",mlb:"STL",rank:68,fv:50,eta:2028,tier:"Tier 3",score:56.5,grade:"C+",vop:-9.8,scout:"Cardinals pitching prospect with a solid three-pitch mix. Good command for his age.",comment:"This feels like quite a reach for Doyle at #29 overall."},
+{pk:30,rd:3,mgr:"arkinsjt",player:"Roch Cholowsky",pos:"SS",mlb:"N/A",rank:100,fv:40,eta:2029,tier:"Tier 5",score:46.0,grade:"C-",vop:-15,scout:"Deep sleeper shortstop with quick hands and solid defensive tools.",comment:"This feels like quite a reach for Cholowsky at #30 overall."},
+{pk:31,rd:4,mgr:"Amustafa79",player:"Kruz Schoolcraft",pos:"SP",mlb:"SD",rank:38,fv:55,eta:2028,tier:"Tier 2",score:66.7,grade:"B",vop:-1.8,scout:"Padres pitching prospect with a power arsenal. Upper-90s heater with a sharp slider.",comment:"A solid if unspectacular value at 31 for Schoolcraft."},
+{pk:32,rd:4,mgr:"Akwelch3492",player:"Caleb Bonemer",pos:"SS",mlb:"CHW",rank:80,fv:45,eta:2029,tier:"Tier 4",score:50.7,grade:"C",vop:-12,scout:"White Sox infield prospect with a solid all-around game.",comment:"This feels like quite a reach for Bonemer at #32 overall."},
+{pk:33,rd:4,mgr:"Duda24",player:"Alfredo Duno",pos:"C",mlb:"CIN",rank:50,fv:50,eta:2028,tier:"Tier 3",score:62.0,grade:"B-",vop:-4.2,scout:"Catching prospect with plus receiving skills and a strong arm. The bat has developed nicely.",comment:"A bit early for Duno at 33, but there's something to be said for locking down a potential franchise backstop."},
+{pk:34,rd:4,mgr:"The Ape",player:"Ethan Holliday",pos:"SS",mlb:"COL",rank:25,fv:55,eta:2027,tier:"Tier 2",score:74.4,grade:"B+",vop:4.5,scout:"Rockies' top prospect. Elite bat-to-ball skills with mature approach. Son of Matt Holliday. Dynasty goldmine.",comment:"The Ape lands a potential dynasty cornerstone in Holliday at 34, securing a prospect whose hit tool and bloodlines suggest a future middle-of-the-order bat."},
+{pk:35,rd:4,mgr:"MannyRamirez24",player:"Kyson Witherspoon",pos:"SP",mlb:"BOS",rank:92,fv:45,eta:2029,tier:"Tier 4",score:48.5,grade:"C-",vop:-14.2,scout:"Young Red Sox arm with projection remaining. Fastball sits low-90s but could add velocity.",comment:"This feels like quite a reach for Witherspoon at #35."},
+{pk:36,rd:4,mgr:"3rduda",player:"Luis Hernandez",pos:"SS",mlb:"SF",rank:28,fv:55,eta:2027,tier:"Tier 2",score:73.9,grade:"B+",vop:4,scout:"Giants' top prospect. Plus defender at shortstop with a polished bat. High floor player.",comment:"A rock-solid selection of Hernandez at 36, landing a high-floor shortstop prospect about 8 picks later than his consensus ranking."},
+{pk:37,rd:4,mgr:"Kyledeleon",player:"Carter Baumler",pos:"RP",mlb:"TEX",rank:98,fv:40,eta:2029,tier:"Tier 5",score:46.0,grade:"C-",vop:-15,scout:"Rangers relief prospect with a power arm. Fastball plays up in short stints.",comment:"A rather ambitious reach here at #37 for Baumler."},
+{pk:38,rd:4,mgr:"Metdown",player:"Kendry Chourio",pos:"SP",mlb:"KC",rank:55,fv:50,eta:2028,tier:"Tier 3",score:62.0,grade:"B-",vop:-4.2,scout:"Another Chourio brother! Pitching prospect with good stuff and athleticism.",comment:"The selection of Kendry Chourio at 38 feels a bit ambitious."},
+{pk:39,rd:4,mgr:"Maxjabb",player:"Ryan Waldschmidt",pos:"OF",mlb:"ARI",rank:105,fv:40,eta:2029,tier:"Tier 5",score:46.0,grade:"C-",vop:-15,scout:"Toolsy D-backs outfielder with raw ability. Speed and defense ahead of the bat.",comment:"This feels like quite a reach for Waldschmidt at #39."},
+{pk:40,rd:4,mgr:"arkinsjt",player:"Lazaro Montes",pos:"OF",mlb:"SEA",rank:110,fv:40,eta:2029,tier:"Tier 5",score:46.0,grade:"C-",vop:-15,scout:"Young international signee with projectable tools. Ultimate long-term dart throw.",comment:"This feels like quite the reach for Montes at pick 40."}
+]
+};
+function rankClass(r){return r<=3?'top3':r<=6?'mid':'low'}
+function gradeClass(g){if(g.startsWith('A'))return'grade-a';if(g.startsWith('B'))return'grade-b';if(g.startsWith('C'))return'grade-c';if(g.startsWith('D'))return'grade-d';return'grade-f'}
+function firstSentence(t){if(!t)return'';let s=t.split('. ')[0];return s.endsWith('.')?s:s+'.'}
+function renderRankings(){
+const el=document.getElementById('rankings');
+let h='';
+DATA.rankings.forEach(r=>{
+const s=DATA.sim[r.name]||{};
+const str=DATA.strengths[r.name]||[0,0];
+const tp=DATA.topPlayers[r.name]||[];
+const blurb=DATA.blurbs[r.name+'|current_year']||'';
+h+=`<div class="card">
+<div class="card-header">
+<div><span class="rank ${rankClass(r.rank)}">#${r.rank}</span> <span class="team-name">${r.name}</span></div>
+<div class="stats-line">Avg Record ${s.w?s.w.toFixed(1):'?'}–${s.l?s.l.toFixed(1):'?'}</div>
+</div>
+<div class="stats-line" style="margin-top:4px">Power <b>${r.power}</b> · Sim Record <b>${s.range||''}</b> · Playoff <b>${s.po!==undefined?s.po.toFixed(0):'?'}%</b> · Title <b>${s.ch!==undefined?s.ch.toFixed(1):'?'}%</b>${s.std?' · ±'+s.std.toFixed(1)+'W':''}</div>
+<div class="metrics">
+<div class="metric"><div class="label">Hitting</div><div class="value">${str[0]}</div></div>
+<div class="metric"><div class="label">Pitching</div><div class="value">${str[1]}</div></div>
+<div class="metric" style="text-align:left"><div class="label">Top 3</div><div class="top-players">${tp.map(p=>p[0]+' ('+p[1]+')').join(' · ')}</div></div>
+</div>
+${blurb?'<div class="blurb">'+firstSentence(blurb)+'</div><details><summary>Full analysis</summary><div class="full">'+blurb+'</div></details>':''}
+${r.strong||r.weak?'<div class="cats"><span class="strong">'+r.strong+'</span> · <span class="weak">'+r.weak+'</span></div>':''}
+</div>`;
+});
+h+=`<div class="section-title">Simulation Results</div>`;
+h+='<table><tr><th>Rank</th><th>Team</th><th>W</th><th>L</th><th>±W</th><th>Sim Record</th><th>Playoff %</th><th>Champ %</th></tr>';
+let sorted=Object.entries(DATA.sim).sort((a,b)=>a[1].med-b[1].med);
+sorted.forEach(([name,s])=>{
+h+=`<tr><td>${s.med}</td><td>${name}</td><td>${s.w.toFixed(1)}</td><td>${s.l.toFixed(1)}</td><td>${s.std.toFixed(1)}</td><td>${s.range}</td><td>${s.po.toFixed(1)}</td><td>${s.ch.toFixed(1)}</td></tr>`;
+});
+h+='</table>';
+h+='<div style="font-size:.7rem;color:#64748b;margin-top:6px"><i>10,000 simulations · Schedule: actual_h2h · Per-player variance tiers · 2-round playoff bracket</i></div>';
+el.innerHTML=h;
+}
+function rankOf(team,metric){
+const teams=Object.keys(DATA.teamStrength);
+const vals=teams.map(t=>{
+const s=DATA.teamStrength[t]||{};const sc=DATA.strengths[t]||[0,0];
+if(metric==='hit')return{t,v:sc[0]};if(metric==='pit')return{t,v:sc[1]};
+return{t,v:s[metric]||0};
+});
+vals.sort((a,b)=>b.v-a.v);
+return vals.findIndex(v=>v.t===team)+1;
+}
+function renderReports(){
+const el=document.getElementById('reports');
+let teams=Object.keys(DATA.reports).sort();
+let h='<div class="filter-bar"><select id="team-select"><option value="">Select a team...</option>';
+teams.forEach(t=>h+=`<option value="${t}">${t}</option>`);
+h+='</select></div><div id="report-content"></div>';
+el.innerHTML=h;
+document.getElementById('team-select').addEventListener('change',function(){
+const t=this.value;
+const rc=document.getElementById('report-content');
+if(!t){rc.innerHTML='';return;}
+const sim=DATA.teamSim[t]||{};
+const str=DATA.teamStrength[t]||{};
+const scs=DATA.strengths[t]||[0,0];
+const tp=DATA.topPlayers[t]||[];
+const report=DATA.reports[t]||'';
+let rh=`<div class="card">
+<div class="card-header"><span class="team-name">${t}</span></div>
+<div class="stats-line" style="margin-top:6px">
+Season Strength <b>${str.score||0}/100</b> · Rank <b>#${str.rank||'-'}</b> of 10 · 
+Projected finish <b>#${sim.med||'-'}</b> (range ${sim.p10||'?'}–${sim.p90||'?'})
+</div>
+<div class="stats-line">Playoff <b>${sim.po||0}%</b> · Championship <b>${(sim.ch||0).toFixed(1)}%</b></div>
+<div class="metrics" style="margin-top:8px">
+<div class="metric"><div class="label">Hitting</div><div class="value">${scs[0]} <span style="font-size:.7rem;color:#94a3b8">#${rankOf(t,'hit')} of 10</span></div></div>
+<div class="metric"><div class="label">Pitching</div><div class="value">${scs[1]} <span style="font-size:.7rem;color:#94a3b8">#${rankOf(t,'pit')} of 10</span></div></div>
+<div class="metric"><div class="label">Hit Balance</div><div class="value">${str.hb||0} <span style="font-size:.7rem;color:#94a3b8">#${rankOf(t,'hb')} of 10</span></div></div>
+<div class="metric"><div class="label">Pitch Balance</div><div class="value">${str.pb||0} <span style="font-size:.7rem;color:#94a3b8">#${rankOf(t,'pb')} of 10</span></div></div>
+<div class="metric"><div class="label">Bench Depth</div><div class="value">${str.bench||0} <span style="font-size:.7rem;color:#94a3b8">#${rankOf(t,'bench')} of 10</span></div></div>
+</div>
+</div>
+<div class="section-title">AI Team Report</div>
+<div class="card"><div style="white-space:pre-wrap;font-size:.8rem;color:#cbd5e1">${report}</div></div>`;
+rc.innerHTML=rh;
+});
+}
+function renderDraft(){
+const el=document.getElementById('draft');
+let h='<div class="section-title">Overall Draft Grades</div>';
+DATA.draftGrades.forEach(g=>{
+h+=`<div class="card">
+<div class="card-header">
+<div><span class="grade ${gradeClass(g.grade)}">${g.grade}</span> <span class="team-name">${g.mgr}</span> — ${g.score.toFixed(1)}/100</div>
+</div>
+<div class="stats-line" style="margin-top:4px"><span class="strong">Best: ${g.best}</span> · <span class="weak">Worst: ${g.worst}</span> · Strategy: ${g.strategy}</div>
+${g.snark?'<div class="commentary-box">'+g.snark+'</div>':''}
+</div>`;
+});
+h+='<div class="section-title">Grade Comparison</div>';
+h+='<table><tr><th>Manager</th><th>Grade</th><th>Score</th><th>Dynasty +</th><th>Season +</th><th>Best Pick</th><th>Worst Pick</th></tr>';
+DATA.draftGrades.forEach(g=>{
+h+=`<tr><td>${g.mgr}</td><td><span class="grade ${gradeClass(g.grade)}">${g.grade}</span></td><td>${g.score.toFixed(1)}</td><td>${g.dyn.toFixed(1)}</td><td>${g.szn.toFixed(1)}</td><td>${g.best}</td><td>${g.worst}</td></tr>`;
+});
+h+='</table>';
+h+='<div class="section-title">Complete Draft Board</div>';
+h+='<table><tr><th>Pk</th><th>Rd</th><th>Manager</th><th>Player</th><th>Pos</th><th>MLB</th><th>Rank</th><th>FV</th><th>ETA</th><th>Score</th><th>Grade</th><th>Value</th></tr>';
+DATA.draftBoard.forEach(p=>{
+h+=`<tr><td>${p.pk}</td><td>${p.rd}</td><td>${p.mgr}</td><td>${p.player}</td><td>${p.pos}</td><td>${p.mlb}</td><td>${p.rank}</td><td>${p.fv}</td><td>${p.eta}</td><td>${p.score.toFixed(1)}</td><td><span class="grade ${gradeClass(p.grade)}">${p.grade}</span></td><td style="color:${p.vop>0?'#22c55e':'#ef4444'}">${p.vop>0?'+':''}${p.vop.toFixed(1)}</td></tr>`;
+});
+h+='</table>';
+h+='<div class="section-title">Best Value Picks</div>';
+let bestPicks=[...DATA.draftBoard].sort((a,b)=>b.vop-a.vop).slice(0,5);
+bestPicks.forEach((p,i)=>{
+h+=`<div class="card"><div class="stats-line"><b>${i+1}.</b> ${p.player} (Pk #${p.pk}, ${p.mgr}) — <span class="strong">+${p.vop.toFixed(1)} value</span> · Consensus #${p.rank} · <span class="grade ${gradeClass(p.grade)}">${p.grade}</span></div></div>`;
+});
+h+='<div class="section-title">Biggest Reaches</div>';
+let worstPicks=[...DATA.draftBoard].sort((a,b)=>a.vop-b.vop).slice(0,5);
+worstPicks.forEach((p,i)=>{
+h+=`<div class="card"><div class="stats-line"><b>${i+1}.</b> ${p.player} (Pk #${p.pk}, ${p.mgr}) — <span class="weak">${p.vop.toFixed(1)} value</span> · Consensus #${p.rank} · <span class="grade ${gradeClass(p.grade)}">${p.grade}</span></div></div>`;
+});
+el.innerHTML=h;
+}
+function renderDynasty(){
+const el=document.getElementById('dynasty');
+let h='';
+DATA.dynasty.forEach(d=>{
+const sim=DATA.sim[d.name]||{};
+const str=DATA.strengths[d.name]||[0,0];
+const tp=DATA.topPlayers[d.name]||[];
+const blurb=DATA.dynastyBlurbs[d.name]||'';
+const simRecord=sim.w?` · 2026 sim: ${sim.w.toFixed(0)}-${sim.l.toFixed(0)}`:'';
+h+=`<div class="card">
+<div class="card-header">
+<div><span class="rank ${rankClass(d.rank)}">#${d.rank}</span> <span class="team-name">${d.name}</span></div>
+<div class="stats-line">Dynasty <b>${d.score}</b></div>
+</div>
+<div class="stats-line" style="margin-top:4px">Value <b>${d.totalVal}</b> · Elite <b>${d.elite}</b> · MiLB <b>${d.milb}/6</b> · Avg Value <b>${d.avgVal}</b></div>
+<div class="metrics" style="margin-top:8px">
+<div class="metric"><div class="label">Hitting</div><div class="value">${str[0]}</div></div>
+<div class="metric"><div class="label">Pitching</div><div class="value">${str[1]}</div></div>
+<div class="metric" style="text-align:left"><div class="label">Top 3</div><div class="top-players">${tp.map(p=>p[0]+' ('+p[1]+')').join(' · ')}</div></div>
+</div>
+${blurb?'<div class="blurb">'+firstSentence(blurb)+'</div><details><summary>Full analysis</summary><div class="full">'+blurb+'</div></details>':''}
+<div class="stats-line" style="margin-top:4px">Quality depth: ${d.quality} · 2026 rank: #${d.sznRank}${simRecord}</div>
+</div>`;
+});
+h+='<div class="section-title">Comparison Table</div>';
+h+='<table><tr><th>Rank</th><th>Team</th><th>Dynasty</th><th>Roster Val</th><th>Elite</th><th>Quality</th><th>MiLB</th><th>Avg Val</th><th>2026 Rank</th></tr>';
+DATA.dynasty.forEach(d=>{
+h+=`<tr><td>${d.rank}</td><td>${d.name}</td><td>${d.score}</td><td>${d.totalVal}</td><td>${d.elite}</td><td>${d.quality}</td><td>${d.milb}/6</td><td>${d.avgVal}</td><td>#${d.sznRank}</td></tr>`;
+});
+h+='</table>';
+el.innerHTML=h;
+}
+function renderMethodology(){
+const el=document.getElementById('methodology');
+let h=`
+<div class="section-title">Data Sources</div>
+<div class="card">
+<div style="font-size:.8rem;color:#cbd5e1">
+<b>Projection Systems (Blended)</b><br>
+All player projections are a weighted blend of three FanGraphs projection systems:<br>
+&bull; <b>Steamer</b> (35% weight) — Algorithmic projections based on aging curves, park factors, and regression<br>
+&bull; <b>ZiPS</b> (30% weight) — Machine learning projections incorporating minor league data and aging<br>
+&bull; <b>Depth Charts</b> (35% weight) — Combines Steamer/ZiPS with community playing time estimates<br><br>
+<b>Fantasy Platform</b><br>
+&bull; Rosters, lineups, and league settings sourced from <b>Fantrax</b> API<br>
+&bull; 10-team dynasty league, H2H categories format (12 categories)<br>
+&bull; Scoring categories: R, HR, RBI, SB, OBP, SLG (hitting) + W, QS, K, ERA, WHIP, NS (pitching)<br><br>
+<b>Prospect Data</b><br>
+&bull; Consensus prospect rankings from MLB Pipeline API<br>
+&bull; FV (Future Value) grades on 20-80 scale<br>
+&bull; Scouting reports and ETA projections from curated prospect database<br><br>
+<b>AI Commentary</b><br>
+&bull; All narrative text generated via <b>Snowflake Cortex COMPLETE</b> (Claude 3.5 Sonnet)<br>
+&bull; Structured prompts include team data, category projections, and specific analytical frameworks
+</div>
+</div>
+
+<div class="section-title">Metric Definitions</div>
+
+<div class="card">
+<div style="font-size:.85rem;font-weight:700;color:#38bdf8;margin-bottom:6px">Player Scoring</div>
+<div style="font-size:.78rem;color:#cbd5e1">
+<b>Redraft Score (0-100)</b> — Composite player rating for current-season fantasy value. Formula:<br>
+<code style="color:#fbbf24;font-size:.72rem">&nbsp;&nbsp;0.40 &times; Category Value + 0.20 &times; Playing Time + 0.15 &times; Role - 0.10 &times; Injury Penalty - 0.05 &times; Volatility Penalty + 0.10 &times; Skill Growth</code><br><br>
+<b>Category Value</b> — Percentile rank of the player's total Z-score across their stat group (hitting or pitching). Z-scores computed per category against all qualified players. Rate stats (OBP, SLG, ERA, WHIP) are volume-adjusted by PA or IP as a fraction of a full-season starter (500 PA / 100 IP). ERA and WHIP Z-scores are inverted (lower is better).<br><br>
+<b>Playing Time</b> — For hitters: <code style="color:#fbbf24;font-size:.72rem">min(PA/600, 1.0) &times; 80 + everyday bonus (10 if PA&ge;500) + platoon bonus (10 if PA&ge;400)</code>. For pitchers: <code style="color:#fbbf24;font-size:.72rem">min(IP/180, 1.0) &times; 70 + rotation lock (15 if GS&ge;25) + closer bonus (15 if SV&ge;15)</code><br><br>
+<b>Role Score</b> — Base 50 + bonuses for everyday status, scarce positions (C, SS, 2B), rotation/closer roles. Penalty for low-volume middle relievers.<br><br>
+<b>Injury Penalty</b> — Fixed 5-point deduction (placeholder for future IL history integration).<br><br>
+<b>Volatility Penalty</b> — Based on projection source agreement: 5 (3+ sources agree), 10 (2 sources), 15 (single source).<br><br>
+<b>Primary Strength / Weakness</b> — Top 2 and bottom 2 category Z-scores above 0.5 or below -0.5.
+</div>
+</div>
+
+<div class="card">
+<div style="font-size:.85rem;font-weight:700;color:#38bdf8;margin-bottom:6px">Team Season Strength</div>
+<div style="font-size:.78rem;color:#cbd5e1">
+<b>Season Strength Score (0-100)</b> — Composite team rating. Formula:<br>
+<code style="color:#fbbf24;font-size:.72rem">&nbsp;&nbsp;0.30 &times; Active Lineup + 0.15 &times; Bench Depth + 0.20 &times; Hit Balance + 0.20 &times; Pitch Balance + 0.10 &times; Injury Resilience + 0.05 &times; IP Pace</code><br><br>
+<b>Active Lineup Score</b> — Mean Redraft Score of active roster players &times; 1.2, capped at 100.<br><br>
+<b>Bench Depth</b> — Mean Redraft Score of reserve players &times; 1.5, capped at 100.<br><br>
+<b>Hit Balance</b> — <code style="color:#fbbf24;font-size:.72rem">max(0, 100 - std_dev(team_z_scores for R,HR,RBI,SB,OBP,SLG) &times; 20)</code>. Higher = more balanced contribution across all 6 hitting categories.<br><br>
+<b>Pitch Balance</b> — Same formula for pitching categories (W, QS, K, ERA, WHIP, NS).<br><br>
+<b>IP Pace</b> — Whether pitching staff meets the 30 IP minimum per scoring period, based on total projected IP / 26 periods.<br><br>
+<b>Strongest / Weakest Categories</b> — Top 3 and bottom 3 categories by summed team Z-scores across all rostered players.
+</div>
+</div>
+
+<div class="card">
+<div style="font-size:.85rem;font-weight:700;color:#38bdf8;margin-bottom:6px">Power Rankings</div>
+<div style="font-size:.78rem;color:#cbd5e1">
+<b>Overall Power Rank</b> — Blends season strength with simulation outcomes:<br>
+<code style="color:#fbbf24;font-size:.72rem">&nbsp;&nbsp;Power Score = Season Strength Score &times; 0.5 + (100 - Median Finish &times; 10) &times; 0.5</code><br><br>
+This rewards both roster quality (via strength score) and projected outcomes (via median simulated finish). Teams ranked by descending Power Score.
+</div>
+</div>
+
+<div class="card">
+<div style="font-size:.85rem;font-weight:700;color:#38bdf8;margin-bottom:6px">Monte Carlo Simulation Engine</div>
+<div style="font-size:.78rem;color:#cbd5e1">
+<b>Overview</b> — 10,000 full-season simulations of the 24-period regular season + 2-round playoff bracket, using the actual H2H schedule.<br><br>
+<b>Per-Player Variance Tiers</b>:<br>
+&bull; <b>Veteran</b> (age 30+): &sigma; = 0.10 — Low variance, established track record<br>
+&bull; <b>Prime</b> (age 25-29): &sigma; = 0.12 — Moderate variance<br>
+&bull; <b>Breakout</b> (age &lt;25, high volume): &sigma; = 0.20 — Higher variance for emerging players<br>
+&bull; <b>Prospect</b> (low volume &lt;100 PA/IP): &sigma; = 0.25 — Uncertain playing time<br>
+&bull; <b>Injury</b> (IL/DL status): &sigma; = 0.30 — Maximum variance for health risk<br><br>
+<b>Stat Simulation</b>:<br>
+&bull; Each player's per-period stats are simulated via <b>Poisson sampling</b>: <code style="color:#fbbf24;font-size:.72rem">rng.poisson(projection &times; noise / N_periods)</code><br>
+&bull; Player noise drawn from <code style="color:#fbbf24;font-size:.72rem">Normal(1.0, variance_tier)</code> per simulation per period<br>
+&bull; <b>Correlated rate stats</b>: ERA and WHIP share a noise component — <code style="color:#fbbf24;font-size:.72rem">era_whip_corr &times; 0.3</code> added to H_allowed, BB_allowed, and ER noise<br>
+&bull; <b>Period 17 double-weighted</b>: 2-week All-Star break gets weight 2.0<br>
+&bull; Rate stats (OBP, SLG, ERA, WHIP) reconstructed from counting stats each period<br><br>
+<b>IP Minimum</b> — 30 IP prorated per period. Teams that fail lose all 12 categories for that matchup.<br><br>
+<b>Matchup Resolution</b> — Each category is compared head-to-head. The team winning more categories wins the matchup (ties split 0.5).<br><br>
+<b>Playoff Bracket</b>:<br>
+&bull; Top 4 teams qualify based on regular season W-L<br>
+&bull; Semifinal: #1 vs #4, #2 vs #3 (single simulated period each)<br>
+&bull; Final: Winners play one more simulated period<br><br>
+<b>Outputs</b>: Projected W-L, standard deviation, record range (10th-90th percentile), median finish, playoff %, championship %, category win rates, seed distribution.
+</div>
+</div>
+
+<div class="card">
+<div style="font-size:.85rem;font-weight:700;color:#38bdf8;margin-bottom:6px">Dynasty Value</div>
+<div style="font-size:.78rem;color:#cbd5e1">
+<b>Dynasty Value Score</b> — Long-term roster valuation incorporating:<br>
+&bull; <b>Total Roster Value</b> — Sum of all player Redraft Scores<br>
+&bull; <b>Elite Count</b> — Players scoring above 90th percentile<br>
+&bull; <b>Quality Count</b> — Players in the 70th-90th percentile range<br>
+&bull; <b>MiLB Slots Used</b> — Out of 6 available minor league roster spots<br>
+&bull; <b>Average Player Value</b> — Mean Redraft Score across all rostered players
+</div>
+</div>
+
+<div class="card">
+<div style="font-size:.85rem;font-weight:700;color:#38bdf8;margin-bottom:6px">Draft Analyzer</div>
+<div style="font-size:.78rem;color:#cbd5e1">
+<b>Pick Score (0-100)</b> — Evaluates each draft pick against consensus rankings:<br>
+<code style="color:#fbbf24;font-size:.72rem">&nbsp;&nbsp;55 + Value Over Pick + Dynasty Value &times; 0.35 + Season Impact &times; 0.25 + Roster Fit &times; 0.20</code><br><br>
+<b>Value Over Pick (VOP)</b> — Difference between draft position and consensus rank. Positive = pick fell to value, Negative = reached above consensus. Capped at +20/-15.<br><br>
+<b>FV Grade</b> — Future Value on the 20-80 scouting scale. Mapped to dynasty value points: 60 FV = 30pts, 55 = 24, 50 = 18, 45 = 12, 40 = 7.<br><br>
+<b>Season Impact</b> — Based on ETA: 2026 arrival = 25pts, 2027 = 18, 2028 = 12, 2029+ = 6.<br><br>
+<b>Overall Draft Grade</b> — Average pick score mapped to letter grade (A+ &ge; 82, A &ge; 78, ... D &lt; 50).<br><br>
+<b>Draft Strategy Tags</b> — Auto-detected from position mix: pitching-heavy (&ge;2 P), SS-centric (&ge;2 SS), outfield-focused (&ge;2 OF), or balanced.
+</div>
+</div>
+
+<div class="section-title">Data Pipeline</div>
+<div class="card">
+<div style="font-size:.78rem;color:#cbd5e1">
+<b>ETL Flow</b>:<br>
+1. <b>Fantrax API</b> &rarr; Raw rosters, league schedule, draft results &rarr; <code style="color:#fbbf24;font-size:.72rem">FANTASY_RAW</code> schema<br>
+2. <b>FanGraphs projections</b> (Steamer/ZiPS/DC) &rarr; Blended projections &rarr; <code style="color:#fbbf24;font-size:.72rem">FANTASY_CANONICAL</code> schema<br>
+3. <b>Scoring Engine</b> &rarr; Z-scores, redraft scores, team strength &rarr; <code style="color:#fbbf24;font-size:.72rem">FANTASY_SCORING</code> schema<br>
+4. <b>Simulation Engine</b> &rarr; 10K Monte Carlo sims &rarr; <code style="color:#fbbf24;font-size:.72rem">FANTASY_SCORING.TEAM_PROJECTED_STANDINGS</code><br>
+5. <b>Commentary Engine</b> &rarr; Snowflake Cortex AI reports per team &rarr; <code style="color:#fbbf24;font-size:.72rem">FANTASY_SCORING.RANKING_COMMENTARY</code><br>
+6. <b>Draft Analyzer</b> &rarr; Pick scores, grades, AI commentary &rarr; <code style="color:#fbbf24;font-size:.72rem">FANTASY_SCORING.DRAFT_*</code><br>
+7. <b>Mart Builder</b> &rarr; Power rankings, dynasty value &rarr; <code style="color:#fbbf24;font-size:.72rem">FANTASY_MARTS</code> schema<br><br>
+All data stored in <b>Snowflake</b> (GAMEVERSE_DB). This static page is a snapshot exported on the date shown above.
+</div>
+</div>
+`;
+el.innerHTML=h;
+}
+document.querySelectorAll('.tab').forEach(tab=>{
+tab.addEventListener('click',function(){
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+this.classList.add('active');
+document.getElementById(this.dataset.tab).classList.add('active');
+});
+});
+renderRankings();
+renderReports();
+renderDynasty();
+renderDraft();
+renderMethodology();
+</script>
+</body>
+</html>
